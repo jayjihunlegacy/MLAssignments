@@ -32,5 +32,7 @@ public:
 	DataSet();
 	~DataSet();
 
-	Data* datas;
+	void setDatanum(int N);
+	Data** datas;
+	int dataNum;
 };

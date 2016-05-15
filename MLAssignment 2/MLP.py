@@ -36,7 +36,7 @@ class HiddenLayer(object):
         self.params = [self.W,self.b]
 
 class MLP(object):
-    def __init__(self,rng,input,n_in,n_hidden,n_out,param_v=None):
+    def __init__(self,rng,input,n_in,n_hidden,n_out,param_v):
         activation_f = T.tanh
         if param_v is not None:
             [hidden_W_value,
@@ -95,3 +95,5 @@ class MLP(object):
         self.errors = self.logRegressionLayer.errors
 
         self.params = self.hiddenLayer.params+self.logRegressionLayer.params
+
+        self.input = input

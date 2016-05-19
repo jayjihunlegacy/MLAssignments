@@ -1,7 +1,7 @@
-from MLP import *
+﻿from MLP import *
 import pickle
 import timeit
-TRAIN_FILE_NAME = 'Train2.csv'
+TRAIN_FILE_NAME = 'Train.csv'
 
 def shared_dataset(data_xy):
     data_x, data_y = data_xy
@@ -14,6 +14,8 @@ def import_data():
     Method to import training data. (Possibly test data, too)
     RETURN data sets.
     '''
+
+    train_portion = 0.8
 
     with open(TRAIN_FILE_NAME, 'r') as f:
         tuples = f.readlines()
@@ -39,7 +41,7 @@ def import_data():
         data_y.append(datum_y)
     
     num_of_total = len(data_x)
-    num_of_train = int(num_of_total*0.9)
+    num_of_train = int(num_of_total*train_portion)
 
     #split data into 1.Train and 2.Valid
     train_x = data_x[0:num_of_train]
@@ -53,7 +55,11 @@ def import_data():
 
     return (train_set, valid_set)
 
-def initialize_weights():
+def initialize_weights(random=False):
+    if random:
+        return None
+
+
     '''
     Method to initialize weights in Neural Network.
 
@@ -71,11 +77,11 @@ def sgd_optimize(dataset,param_v):
     '''
     #hyper parameters
     feats=24
-    learning_rate=0.01
-    batch_size=20
-    L1_reg=0
-    L2_reg=0.0001
-    n_epochs = 1000
+    learning_rate=0.001
+    batch_size=100
+    L1_reg=0.001
+    L2_reg=0.001
+    n_epochs = 5000
 
     train_x, train_y = dataset[0]
     valid_x, valid_y = dataset[1]
@@ -95,7 +101,7 @@ def sgd_optimize(dataset,param_v):
         input=x,
         n_in=feats,
         n_hidden = feats//2,
-        n_out=1,
+        n_out=2,
         param_v=param_v
         )
     cost = (model.NLL(y) + L1_reg*model.L1 + L2_reg*model.L2_sqr)
@@ -108,12 +114,12 @@ def sgd_optimize(dataset,param_v):
             y: valid_y[index * batch_size : (index + 1) * batch_size]
             }
         )
-
+    print('1. Valid built')
     gparams = [T.grad(cost, param) for param in model.params]
 
     updates = [(param, param - learning_rate * gparam)
                for param, gparam in zip(model.params, gparams)]
-
+    print('2. Gradient calculated.')
     train_model = theano.function(
         inputs=[index],
         outputs=cost,
@@ -123,9 +129,9 @@ def sgd_optimize(dataset,param_v):
             y: train_y[index * batch_size : (index + 1) * batch_size]
             }
         )
-
+    print('3. Train built.')
     print('Training model...')
-    patience = 10000
+    patience = 1000000
     patience_increase = 2
     improvement_threshold = 0.995
     validation_frequency = min(n_train_batches, patience//2)
@@ -147,7 +153,7 @@ def sgd_optimize(dataset,param_v):
             iter = (epoch - 1) * n_train_batches + minibatch_index
 
             if (iter + 1)%validation_frequency == 0:
-                validation_losses = [validate_model(i) for i in range(n_valid_batches)]
+                validation_losses = [valid_model(i) for i in range(n_valid_batches)]
                 this_validation_loss = numpy.mean(validation_losses)
 
                 print('epoch %i, minibatch %i/%i, validation error %f %%'%(epoch,minibatch_index+1,n_train_batches,this_validation_loss*100))
@@ -166,11 +172,16 @@ def sgd_optimize(dataset,param_v):
     end_time = timeit.default_timer()
     print('Optimization complete with best validation score of %f %%'%(best_validation_loss*100))
     print('The code run for %d epochs, with %f epochs/sec' %(epoch, epoch/(end_time-start_time)))
+
+    print('Saving weights...')
+
+
 def test():
     pass
 
 
 def main():
+    print('Start program...')
     dataset = import_data()
     param_v = initialize_weights()
     sgd_optimize(dataset,param_v)

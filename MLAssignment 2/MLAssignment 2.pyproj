@@ -41,9 +41,9 @@
     <Content Include="Submission_Prob2.csv" />
     <Content Include="Test.csv" />
     <Content Include="test.fasta" />
+    <Content Include="TextFile1.txt" />
     <Content Include="Train.csv" />
     <Content Include="train.fasta" />
-    <Content Include="Train2.csv" />
     <Content Include="train_ans.txt" />
   </ItemGroup>
   <Import Condition="Exists($(PtvsTargetsFile))" Project="$(PtvsTargetsFile)" />

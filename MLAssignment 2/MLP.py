@@ -9,6 +9,7 @@ class LogisticRegression(object):
 
         self.p_y_given_x = T.nnet.softmax(T.dot(input, self.W) + self.b)
         self.y_pred = T.argmax(self.p_y_given_x, axis=1)
+
         self.params = [self.W, self.b]
         self.input = input
 
